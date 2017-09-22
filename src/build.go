@@ -424,6 +424,21 @@ func copyResources(qmakePath string, target string) error {
 	return copyResourcesLinux(qmakePath, target)
 }
 
+func findQtPluginDir(qmakePath string) (string, error) {
+	// Should be safe to assume that qmake and qtpaths live in the same path.
+	qtpaths := filepath.Join(filepath.Dir(qmakePath), "qtpaths")
+
+	output, err := exec.Command(qtpaths, "--plugin-dir").Output()
+	if err != nil {
+		return "", err
+	}
+
+	// The qtpaths output ends with a newline, so remove it
+	pluginDir := strings.Trim(string(output[:]), "\n")
+
+	return pluginDir, nil
+}
+
 func copyResourcesLinux(qmakePath string, target string) error {
 	if _, err := exec.LookPath("chrpath"); err != nil {
 		return fmt.Errorf("Unable to find chrpath on the PATH: %v", err)
@@ -604,7 +619,20 @@ func chmodEachInDir(mode os.FileMode, dir string, filenames ...string) error {
 }
 
 func copyPlugins(qmakePath string, target string, dir string, plugins ...string) error {
-	srcDir := filepath.Join(qmakePath, "../../plugins", dir)
+	var srcDir string
+
+	if runtime.GOOS == "linux" {
+		pluginDir, err := findQtPluginDir(qmakePath)
+
+		if err != nil {
+			return fmt.Errorf("Unable to find Qt plugins dir %v: %v", dir, err)
+		}
+
+		srcDir = filepath.Join(pluginDir, dir)
+	} else {
+		srcDir = filepath.Join(qmakePath, "../../plugins", dir)
+	}
+
 	if _, err := os.Stat(srcDir); os.IsExist(err) {
 		return fmt.Errorf("Unable to find Qt plugins dir %v: %v", dir, err)
 	}
