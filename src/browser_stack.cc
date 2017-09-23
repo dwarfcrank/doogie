@@ -37,7 +37,13 @@ BrowserWidget* BrowserStack::NewBrowser(const Bubble& bubble,
     emit BrowserDestroyed(widg);
   });
   // We load the URL separately so we can have the loading icon and what not
-  if (!url.isEmpty()) widg->LoadUrl(url);
+  if (!url.isEmpty()) {
+    widg->LoadUrl(url);
+  } else {
+    // Can't use CefWidget::ShowStringPage here, as CEF's LoadString doesn't
+    // work without an existing renderer process and won't create one.
+    widg->LoadUrl("data:,New tab");
+  }
   widg->resize(size());
   addWidget(widg);
   return widg;
