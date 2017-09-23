@@ -455,9 +455,9 @@ func copyResourcesLinux(qmakePath string, target string) error {
 		"libQt5Sql.so.5",
 		"libQt5Widgets.so.5",
 		// TODO: See https://bugreports.qt.io/browse/QTBUG-53865
-		"libicui18n.so.56",
-		"libicuuc.so.56",
-		"libicudata.so.56",
+		"libicui18n.so.59",
+		"libicuuc.so.59",
+		"libicudata.so.59",
 		// Needed for libqxcb platform
 		"libQt5XcbQpa.so.5",
 		"libQt5DBus.so.5",
